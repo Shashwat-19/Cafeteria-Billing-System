@@ -49,33 +49,38 @@ Make sure you have Python 3 installed.
 
 ## 🚀 Usage Guide
 
-Launch the program.
-Browse the Menu tabs (Main Dishes, Sides, Beverages, Desserts).
-Select quantity and click "Add to Cart".
-Review items in the Shopping Cart.
-Use Remove or Clear Cart if needed.
-Click Checkout to complete the order.
-🧱 Project Structure
+- Launch the program.
+- Browse the Menu tabs (Main Dishes, Sides, Beverages, Desserts).
+- Select quantity and click "Add to Cart".
+- Review items in the Shopping Cart.
+- Use Remove or Clear Cart if needed.
+- Click Checkout to complete the order.
 
+## 🧱 Project Structure
+```
 📦 cafeteria-system/
-├── 📄 app.py              # Main application file
-├── 📄 README.md           # Project documentation
+├── main.ipynb
+├── LICENSE           
+├── README.md
+```
 📊 Future Enhancements
 
-🌍 Multi-language support integration (i18n JSON files)
-💾 Order persistence (write to file/database)
-💳 Payment gateway simulation
-📱 Responsive version using tkinter.ttk styling or web-based alternative
-🤝 Contribution Guidelines
+- 🌍 Multi-language support integration (i18n JSON files)
+- 💾 Order persistence (write to file/database)
+- 💳 Payment gateway simulation
+- 📱 Responsive version using tkinter.ttk styling or web-based alternative
+
+## 🤝 Contribution Guidelines
 
 Want to improve the project? Here's how you can help:
 
-Fork the repo 🍴
-Create your feature branch (git checkout -b feature/something)
-Commit your changes (git commit -m 'Add some feature')
-Push to the branch (git push origin feature/something)
-Open a pull request ✅
-📜 License
+- Fork the repo 🍴
+- Create your feature branch (git checkout -b feature/something)
+- Commit your changes (git commit -m 'Add some feature')
+- Push to the branch (git push origin feature/something)
+- Open a pull request ✅
+
+## 📜 License
 
 This project is licensed under the MIT License.
 
