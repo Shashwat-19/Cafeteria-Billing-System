@@ -63,37 +63,35 @@ Make sure you have Python 3 installed.
 ├── LICENSE           
 ├── README.md
 ```
-📊 Future Enhancements
+## 📊 Future Enhancements
 
 - 🌍 Multi-language support integration (i18n JSON files)
 - 💾 Order persistence (write to file/database)
 - 💳 Payment gateway simulation
 - 📱 Responsive version using tkinter.ttk styling or web-based alternative
 
-## 🤝 Contribution Guidelines
+## 📚 Documentation
 
-Want to improve the project? Here's how you can help:
+Comprehensive documentation for this project is available on [Hashnode](https://hashnode.com/@Shashwat56).
 
-- Fork the repo 🍴
-- Create your feature branch (git checkout -b feature/something)
-- Commit your changes (git commit -m 'Add some feature')
-- Push to the branch (git push origin feature/something)
-- Open a pull request ✅
+> At present, this README serves as the primary source of documentation.
 
 ## 📜 License
 
-This project is licensed under the MIT License.
+This project is distributed under the MIT License.  
+For detailed licensing information, please refer to the [LICENSE](./LICENSE) file included in this repository.
 
-📬 Contact
 
-Author: [Your Name]
-📧 Email: your.email@example.com
-🔗 GitHub: github.com/yourusername
+## 📩 Contact  
+### Shashwat  
+**Software Developer | Cloud & DevOps Enthusiast**
 
-📸 Screenshots
+**🔹 Java Backend Development**<br>
+**🔹 Cloud Architecture & Containerization**<br>
+**🔹 DevOps & Scalable Systems**
 
-You can add GUI screenshots here to visually represent the project.
-🙌 Acknowledgements
+### 🚀 Open Source | Tech Innovation  
+Passionate about building scalable applications and contributing to transformative tech solutions.
 
-Python tkinter documentation
-Open-source inspirations for GUI structuring
+### 📌 Find me here:  
+[<img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" />](https://github.com/Shashwat-19)  [<img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />](https://www.linkedin.com/in/shashwatk1956/)  [<img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" />](mailto:shashwat1956@gmail.com)  [<img src="https://img.shields.io/badge/Hashnode-2962FF?style=for-the-badge&logo=hashnode&logoColor=white" />](https://hashnode.com/@Shashwat56)
