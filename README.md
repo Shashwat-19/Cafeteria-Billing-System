@@ -1,5 +1,12 @@
 # 🍽️ Cafeteria System
 
+![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
+![Tkinter](https://img.shields.io/badge/Tkinter-GUI-green?logo=python)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Platform](https://img.shields.io/badge/Platform-Desktop-lightgrey)
+
+
 A desktop-based GUI application for cafeteria ordering, built using Python and `tkinter`. The system allows users to browse categorized menus, add items to a shopping cart, and proceed to checkout with real-time cart updates and total calculation.
 
 ---
