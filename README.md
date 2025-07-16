@@ -79,6 +79,10 @@ Make sure you have Python 3 installed.
 
 ## 📚 Documentation
 
+## 📚 Documentation
+
+- Interactive walkthrough is available in [Cafeteria Billing System](./main.ipynb)
+- Full project details on [Hashnode](https://hashnode.com/@Shashwat56)
 Comprehensive documentation for this project is available on [Hashnode](https://hashnode.com/@Shashwat56).
 
 > At present, this README serves as the primary source of documentation.
