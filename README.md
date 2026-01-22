@@ -2,6 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?logo=streamlit)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
 ![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?logo=sqlite)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
@@ -24,7 +25,8 @@ This **Cafeteria System** has been upgraded to a full-featured web application. 
 - **🛒 Dynamic Cart**: Real-time total calculation with quantity adjustments.
 - **🧾 Digital Receipts**: Generate, view, and print professional bills directly from the app.
 - **📜 Order History**: Track past orders and reprint receipts anytime via the database.
-- **💾 Persistent Database**: Powered by SQLite & SQLAlchemy to store all menu items and transaction history.
+- **� Docker Support**: Fully containerized for easy deployment and consistent environments.
+- **�💾 Persistent Database**: Powered by SQLite & SQLAlchemy to store all menu items and transaction history.
 
 ---
 
@@ -34,6 +36,7 @@ This **Cafeteria System** has been upgraded to a full-featured web application. 
 | --------------- | ------------------------------------- |
 | Python          | Core programming language             |
 | Streamlit       | Modern Web UI framework               |
+| Docker          | Containerization platform             |
 | SQLite          | Relational Database                   |
 | SQLAlchemy      | ORM for database management           |
 | Pollinations.ai | API for real-time AI image generation |
@@ -41,6 +44,25 @@ This **Cafeteria System** has been upgraded to a full-featured web application. 
 ---
 
 ## 📥 Installation & Setup
+
+### Option 1: Docker (Recommended)
+
+The easiest way to run the app without installing dependencies manually.
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/yourusername/cafeteria-system.git
+   cd cafeteria-system
+   ```
+2. **Run with Docker Compose**:
+   ```bash
+   docker-compose up --build
+   ```
+   _The app will be available at `http://localhost:8501`_
+
+### Option 2: Local Python Setup
+
+If you prefer running it natively on your machine:
 
 1. **Clone the repository**
 
@@ -87,6 +109,8 @@ This **Cafeteria System** has been upgraded to a full-featured web application. 
 │   ├── requirements.txt  # Project dependencies
 │   └── styles.css        # Custom CSS for dark theme & receipts
 ├── cafeteria.db          # SQLite Database file
+├── Dockerfile            # Docker container configuration
+├── docker-compose.yml    # Docker Compose orchestration
 ├── README.md
 └── LICENSE
 ```
