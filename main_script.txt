@@ -1,0 +1,538 @@
+import tkinter as tk
+from tkinter import ttk, messagebox, font
+from datetime import datetime
+import json
+
+class ModernCafeteriaSystem:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Modern Cafeteria System")
+        self.root.geometry("1400x800")
+        self.root.configure(bg='#1a1a1a')
+        
+        # Modern color scheme
+        self.colors = {
+            'primary': '#2563eb',      # Blue
+            'secondary': '#000000',    # Black
+            'accent': '#f59e0b',       # Amber
+            'success': '#10b981',      # Green
+            'danger': '#ef4444',       # Red
+            'warning': '#f59e0b',      # Orange
+            'background': '#1a1a1a',   # Dark background
+            'surface': '#000000',      # Black card background
+            'text': '#ffffff',         # White text
+            'text_secondary': '#ffffff', # White text
+            'border': '#374151'        # Border color
+        }
+        
+        # Custom fonts
+        self.fonts = {
+            'heading': ('Segoe UI', 24, 'bold'),
+            'subheading': ('Segoe UI', 16, 'bold'),
+            'body': ('Segoe UI', 11),
+            'small': ('Segoe UI', 10),
+            'button': ('Segoe UI', 10, 'bold')
+        }
+        
+        # Language settings
+        self.current_language = "en"
+        self.text = {
+            "title": "Modern Cafeteria",
+            "menu_title": "Menu",
+            "cart_title": "Shopping Cart",
+            "total": "Total",
+            "clear_cart": "Clear Cart",
+            "checkout": "Checkout",
+            "quantity": "Qty",
+            "price": "Price",
+            "add_to_cart": "Add to Cart",
+            "item": "Item",
+            "remove": "Remove",
+            "order_complete": "Order Complete!",
+            "order_message": "Your order has been processed successfully!",
+            "empty_cart": "Cart is empty!",
+            "categories": {
+                "mains": "🍽️ Main Dishes",
+                "sides": "🥗 Sides",
+                "beverages": "🥤 Beverages",
+                "desserts": "🍰 Desserts"
+            }
+        }
+        
+        # Menu items with emojis
+        self.menu_items = {
+            "mains": [
+                {"name": "🍗 Grilled Chicken", "price": 12.99, "desc": "Tender grilled chicken breast with herbs"},
+                {"name": "🍔 Beef Burger", "price": 10.99, "desc": "Juicy beef patty with fresh toppings"},
+                {"name": "🐟 Fish & Chips", "price": 14.99, "desc": "Crispy battered fish with golden fries"},
+                {"name": "🍝 Pasta Carbonara", "price": 11.99, "desc": "Classic Italian pasta with creamy sauce"},
+                {"name": "🍕 Vegetarian Pizza", "price": 13.99, "desc": "Fresh vegetables on crispy crust"}
+            ],
+            "sides": [
+                {"name": "🍟 French Fries", "price": 4.99, "desc": "Golden crispy potato fries"},
+                {"name": "🧅 Onion Rings", "price": 5.99, "desc": "Crispy beer-battered onion rings"},
+                {"name": "🥗 Garden Salad", "price": 6.99, "desc": "Fresh mixed greens with dressing"},
+                {"name": "🥔 Mashed Potatoes", "price": 4.99, "desc": "Creamy whipped potatoes"},
+                {"name": "🥬 Coleslaw", "price": 3.99, "desc": "Fresh cabbage slaw with tangy dressing"}
+            ],
+            "beverages": [
+                {"name": "🥤 Coca Cola", "price": 2.99, "desc": "Classic refreshing cola"},
+                {"name": "🍊 Orange Juice", "price": 3.99, "desc": "Fresh squeezed orange juice"},
+                {"name": "☕ Coffee", "price": 2.49, "desc": "Premium roasted coffee"},
+                {"name": "🧊 Iced Tea", "price": 2.99, "desc": "Refreshing iced tea"},
+                {"name": "💧 Water", "price": 1.99, "desc": "Pure spring water"}
+            ],
+            "desserts": [
+                {"name": "🍰 Chocolate Cake", "price": 6.99, "desc": "Rich chocolate layer cake"},
+                {"name": "🍨 Ice Cream", "price": 4.99, "desc": "Creamy vanilla ice cream"},
+                {"name": "🥧 Apple Pie", "price": 5.99, "desc": "Classic apple pie with cinnamon"},
+                {"name": "🧀 Cheesecake", "price": 7.99, "desc": "New York style cheesecake"},
+                {"name": "🍪 Cookies", "price": 3.99, "desc": "Freshly baked chocolate chip cookies"}
+            ]
+        }
+        
+        # Shopping cart
+        self.cart = []
+        self.cart_total = 0.0
+        
+        # Configure styles
+        self.setup_styles()
+        
+        # Initialize GUI
+        self.setup_gui()
+        
+    def setup_styles(self):
+        style = ttk.Style()
+        
+        # Configure notebook style
+        style.theme_use('clam')
+        style.configure('Custom.TNotebook', background=self.colors['surface'])
+        style.configure('Custom.TNotebook.Tab', 
+                       background=self.colors['secondary'],
+                       foreground=self.colors['text'],
+                       padding=[20, 10],
+                       font=self.fonts['body'])
+        style.map('Custom.TNotebook.Tab',
+                 background=[('selected', self.colors['primary'])],
+                 foreground=[('selected', self.colors['text'])])
+        
+    def setup_gui(self):
+        # Main container
+        main_container = tk.Frame(self.root, bg=self.colors['background'])
+        main_container.pack(fill=tk.BOTH, expand=True)
+        
+        # Header
+        self.create_header(main_container)
+        
+        # Main content area
+        content_frame = tk.Frame(main_container, bg=self.colors['background'])
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=20)
+        
+        # Left panel - Menu
+        self.create_menu_panel(content_frame)
+        
+        # Right panel - Cart
+        self.create_cart_panel(content_frame)
+        
+    def create_header(self, parent):
+        header_frame = tk.Frame(parent, bg=self.colors['secondary'], height=80)
+        header_frame.pack(fill=tk.X)
+        header_frame.pack_propagate(False)
+        
+        # Title with gradient effect
+        title_frame = tk.Frame(header_frame, bg=self.colors['secondary'])
+        title_frame.pack(expand=True, fill=tk.BOTH)
+        
+        self.title_label = tk.Label(title_frame, 
+                                   text=self.text["title"],
+                                   font=self.fonts['heading'],
+                                   fg=self.colors['text'],
+                                   bg=self.colors['secondary'])
+        self.title_label.pack(side=tk.LEFT, padx=30, pady=20)
+        
+        # Subtitle
+        subtitle_label = tk.Label(title_frame,
+                                 text="Premium Dining Experience",
+                                 font=self.fonts['small'],
+                                 fg=self.colors['text_secondary'],
+                                 bg=self.colors['secondary'])
+        subtitle_label.pack(side=tk.LEFT, padx=(0, 30), pady=25, anchor=tk.S)
+        
+        # Time display
+        time_label = tk.Label(title_frame,
+                             text=datetime.now().strftime("%H:%M"),
+                             font=self.fonts['subheading'],
+                             fg=self.colors['accent'],
+                             bg=self.colors['secondary'])
+        time_label.pack(side=tk.RIGHT, padx=30, pady=20)
+        
+    def create_menu_panel(self, parent):
+        # Menu container
+        menu_container = tk.Frame(parent, bg=self.colors['background'])
+        menu_container.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 15))
+        
+        # Menu header
+        menu_header = tk.Frame(menu_container, bg=self.colors['surface'], height=60)
+        menu_header.pack(fill=tk.X, pady=(0, 20))
+        menu_header.pack_propagate(False)
+        
+        menu_title = tk.Label(menu_header,
+                             text=self.text["menu_title"],
+                             font=self.fonts['subheading'],
+                             fg=self.colors['text'],
+                             bg=self.colors['surface'])
+        menu_title.pack(side=tk.LEFT, padx=20, pady=15)
+        
+        # Search bar placeholder
+        search_frame = tk.Frame(menu_header, bg=self.colors['surface'])
+        search_frame.pack(side=tk.RIGHT, padx=20, pady=10)
+        
+        search_label = tk.Label(search_frame, text="🔍 Search menu...", 
+                               font=self.fonts['small'],
+                               fg=self.colors['text_secondary'],
+                               bg=self.colors['surface'])
+        search_label.pack()
+        
+        # Menu notebook
+        self.menu_notebook = ttk.Notebook(menu_container, style='Custom.TNotebook')
+        self.menu_notebook.pack(fill=tk.BOTH, expand=True)
+        
+        # Create menu tabs
+        self.create_menu_tabs()
+        
+    def create_cart_panel(self, parent):
+        # Cart container
+        cart_container = tk.Frame(parent, bg=self.colors['surface'], width=400)
+        cart_container.pack(side=tk.RIGHT, fill=tk.Y, padx=(15, 0))
+        cart_container.pack_propagate(False)
+        
+        # Cart header
+        cart_header = tk.Frame(cart_container, bg=self.colors['surface'], height=60)
+        cart_header.pack(fill=tk.X, pady=20, padx=20)
+        cart_header.pack_propagate(False)
+        
+        cart_title = tk.Label(cart_header,
+                             text=self.text["cart_title"],
+                             font=self.fonts['subheading'],
+                             fg=self.colors['text'],
+                             bg=self.colors['surface'])
+        cart_title.pack(side=tk.LEFT, pady=15)
+        
+        # Cart count badge
+        self.cart_count_label = tk.Label(cart_header,
+                                        text="0",
+                                        font=self.fonts['small'],
+                                        fg=self.colors['text'],
+                                        bg=self.colors['primary'],
+                                        width=3, height=1)
+        self.cart_count_label.pack(side=tk.RIGHT, pady=15)
+        
+        # Cart items frame
+        cart_items_frame = tk.Frame(cart_container, bg=self.colors['surface'])
+        cart_items_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
+        
+        # Cart scrollable area
+        canvas = tk.Canvas(cart_items_frame, bg=self.colors['surface'], 
+                          highlightthickness=0)
+        scrollbar = ttk.Scrollbar(cart_items_frame, orient="vertical", command=canvas.yview)
+        self.cart_scrollable_frame = tk.Frame(canvas, bg=self.colors['surface'])
+        
+        self.cart_scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=self.cart_scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Cart footer
+        cart_footer = tk.Frame(cart_container, bg=self.colors['surface'], height=120)
+        cart_footer.pack(fill=tk.X, side=tk.BOTTOM, padx=20, pady=(0, 20))
+        cart_footer.pack_propagate(False)
+        
+        # Total display
+        self.total_label = tk.Label(cart_footer,
+                                   text=f"{self.text['total']}: $0.00",
+                                   font=self.fonts['subheading'],
+                                   fg=self.colors['text'],
+                                   bg=self.colors['surface'])
+        self.total_label.pack(pady=(10, 15))
+        
+        # Buttons frame
+        buttons_frame = tk.Frame(cart_footer, bg=self.colors['surface'])
+        buttons_frame.pack(fill=tk.X)
+        
+        # Clear cart button
+        self.clear_btn = tk.Button(buttons_frame,
+                                  text=self.text["clear_cart"],
+                                  command=self.clear_cart,
+                                  bg=self.colors['danger'],
+                                  fg=self.colors['text'],
+                                  font=self.fonts['button'],
+                                  relief=tk.FLAT,
+                                  height=2,
+                                  cursor='hand2')
+        self.clear_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        
+        # Checkout button
+        self.checkout_btn = tk.Button(buttons_frame,
+                                     text=self.text["checkout"],
+                                     command=self.checkout,
+                                     bg=self.colors['success'],
+                                     fg=self.colors['text'],
+                                     font=self.fonts['button'],
+                                     relief=tk.FLAT,
+                                     height=2,
+                                     cursor='hand2')
+        self.checkout_btn.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(5, 0))
+        
+        # Hover effects for buttons
+        self.add_hover_effect(self.clear_btn, self.colors['danger'])
+        self.add_hover_effect(self.checkout_btn, self.colors['success'])
+        
+    def create_menu_tabs(self):
+        # Clear existing tabs
+        for tab in self.menu_notebook.tabs():
+            self.menu_notebook.forget(tab)
+        
+        # Create tabs for each category
+        for category in self.menu_items:
+            tab_frame = tk.Frame(self.menu_notebook, bg=self.colors['background'])
+            self.menu_notebook.add(tab_frame, text=self.text["categories"][category])
+            
+            # Create scrollable frame for items
+            canvas = tk.Canvas(tab_frame, bg=self.colors['background'], 
+                              highlightthickness=0)
+            scrollbar = ttk.Scrollbar(tab_frame, orient="vertical", command=canvas.yview)
+            scrollable_frame = tk.Frame(canvas, bg=self.colors['background'])
+            
+            scrollable_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            )
+            
+            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+            canvas.configure(yscrollcommand=scrollbar.set)
+            
+            # Add items to scrollable frame
+            items = self.menu_items[category]
+            for item in items:
+                self.create_modern_item_widget(scrollable_frame, item)
+            
+            canvas.pack(side="left", fill="both", expand=True, padx=20, pady=20)
+            scrollbar.pack(side="right", fill="y")
+    
+    def create_modern_item_widget(self, parent, item):
+        # Modern card-style item widget
+        card_frame = tk.Frame(parent, bg=self.colors['surface'], relief=tk.FLAT, bd=0)
+        card_frame.pack(fill=tk.X, pady=10)
+        
+        # Add subtle shadow effect
+        shadow_frame = tk.Frame(parent, bg=self.colors['border'], height=2)
+        shadow_frame.pack(fill=tk.X, pady=(0, 5))
+        
+        # Main content frame
+        content_frame = tk.Frame(card_frame, bg=self.colors['surface'])
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=15)
+        
+        # Left side - Item info
+        info_frame = tk.Frame(content_frame, bg=self.colors['surface'])
+        info_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        # Item name
+        name_label = tk.Label(info_frame,
+                             text=item["name"],
+                             font=self.fonts['body'],
+                             fg=self.colors['text'],
+                             bg=self.colors['surface'],
+                             anchor=tk.W)
+        name_label.pack(fill=tk.X, pady=(0, 5))
+        
+        # Item description
+        desc_label = tk.Label(info_frame,
+                             text=item["desc"],
+                             font=self.fonts['small'],
+                             fg=self.colors['text_secondary'],
+                             bg=self.colors['surface'],
+                             anchor=tk.W,
+                             wraplength=250)
+        desc_label.pack(fill=tk.X, pady=(0, 5))
+        
+        # Price
+        price_label = tk.Label(info_frame,
+                              text=f"${item['price']:.2f}",
+                              font=self.fonts['body'],
+                              fg=self.colors['accent'],
+                              bg=self.colors['surface'],
+                              anchor=tk.W)
+        price_label.pack(fill=tk.X)
+        
+        # Right side - Controls
+        controls_frame = tk.Frame(content_frame, bg=self.colors['surface'])
+        controls_frame.pack(side=tk.RIGHT, padx=(20, 0))
+        
+        # Quantity controls
+        qty_frame = tk.Frame(controls_frame, bg=self.colors['surface'])
+        qty_frame.pack(pady=(0, 10))
+        
+        # Quantity spinbox with modern styling
+        quantity_var = tk.StringVar(value="1")
+        qty_spinbox = tk.Spinbox(qty_frame,
+                                from_=1, to=20,
+                                width=6,
+                                textvariable=quantity_var,
+                                font=self.fonts['body'],
+                                bg=self.colors['secondary'],
+                                fg=self.colors['text'],
+                                insertbackground=self.colors['text'],
+                                relief=tk.FLAT,
+                                bd=0)
+        qty_spinbox.pack()
+        
+        # Add to cart button
+        add_btn = tk.Button(controls_frame,
+                           text=self.text["add_to_cart"],
+                           command=lambda: self.add_to_cart(item, quantity_var.get()),
+                           bg=self.colors['primary'],
+                           fg=self.colors['text'],
+                           font=self.fonts['button'],
+                           relief=tk.FLAT,
+                           cursor='hand2',
+                           width=12,
+                           height=2)
+        add_btn.pack()
+        
+        # Hover effect
+        self.add_hover_effect(add_btn, self.colors['primary'])
+        
+    def add_hover_effect(self, widget, base_color):
+        def on_enter(event):
+            widget.config(bg=self.lighten_color(base_color))
+        
+        def on_leave(event):
+            widget.config(bg=base_color)
+        
+        widget.bind("<Enter>", on_enter)
+        widget.bind("<Leave>", on_leave)
+    
+    def lighten_color(self, color):
+        # Simple color lightening - in a real app, use proper color manipulation
+        color_map = {
+            self.colors['primary']: '#3b82f6',
+            self.colors['success']: '#16a34a',
+            self.colors['danger']: '#dc2626'
+        }
+        return color_map.get(color, color)
+    
+    def add_to_cart(self, item, quantity):
+        try:
+            qty = int(quantity)
+            if qty > 0:
+                cart_item = {
+                    "name": item["name"],
+                    "price": item["price"],
+                    "quantity": qty,
+                    "subtotal": item["price"] * qty
+                }
+                self.cart.append(cart_item)
+                self.update_cart_display()
+        except ValueError:
+            messagebox.showerror("Error", "Invalid quantity")
+    
+    def update_cart_display(self):
+        # Clear existing cart items
+        for widget in self.cart_scrollable_frame.winfo_children():
+            widget.destroy()
+        
+        self.cart_total = 0.0
+        
+        # Add items to cart display
+        for i, item in enumerate(self.cart):
+            self.create_cart_item_widget(self.cart_scrollable_frame, item, i)
+            self.cart_total += item['subtotal']
+        
+        # Update total and count
+        self.total_label.config(text=f"{self.text['total']}: ${self.cart_total:.2f}")
+        self.cart_count_label.config(text=str(len(self.cart)))
+    
+    def create_cart_item_widget(self, parent, item, index):
+        # Cart item frame
+        item_frame = tk.Frame(parent, bg=self.colors['secondary'], relief=tk.FLAT)
+        item_frame.pack(fill=tk.X, pady=2)
+        
+        # Item content
+        content_frame = tk.Frame(item_frame, bg=self.colors['secondary'])
+        content_frame.pack(fill=tk.X, padx=10, pady=8)
+        
+        # Item name and quantity
+        name_qty_label = tk.Label(content_frame,
+                                 text=f"{item['name']} x{item['quantity']}",
+                                 font=self.fonts['small'],
+                                 fg=self.colors['text'],
+                                 bg=self.colors['secondary'],
+                                 anchor=tk.W)
+        name_qty_label.pack(fill=tk.X)
+        
+        # Price and remove button frame
+        bottom_frame = tk.Frame(content_frame, bg=self.colors['secondary'])
+        bottom_frame.pack(fill=tk.X, pady=(5, 0))
+        
+        # Price
+        price_label = tk.Label(bottom_frame,
+                              text=f"${item['subtotal']:.2f}",
+                              font=self.fonts['small'],
+                              fg=self.colors['accent'],
+                              bg=self.colors['secondary'])
+        price_label.pack(side=tk.LEFT)
+        
+        # Remove button
+        remove_btn = tk.Button(bottom_frame,
+                              text="✕",
+                              command=lambda: self.remove_from_cart(index),
+                              bg=self.colors['danger'],
+                              fg=self.colors['text'],
+                              font=self.fonts['small'],
+                              relief=tk.FLAT,
+                              width=3,
+                              height=1,
+                              cursor='hand2')
+        remove_btn.pack(side=tk.RIGHT)
+        
+        self.add_hover_effect(remove_btn, self.colors['danger'])
+    
+    def remove_from_cart(self, index):
+        if 0 <= index < len(self.cart):
+            del self.cart[index]
+            self.update_cart_display()
+    
+    def clear_cart(self):
+        if self.cart:
+            self.cart.clear()
+            self.update_cart_display()
+    
+    def checkout(self):
+        if not self.cart:
+            messagebox.showwarning("Warning", self.text["empty_cart"])
+            return
+        
+        # Process order
+        order_details = {
+            "items": self.cart,
+            "total": self.cart_total,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Show success message
+        messagebox.showinfo(self.text["order_complete"], 
+                           self.text["order_message"])
+        
+        # Clear cart after successful order
+        self.clear_cart()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ModernCafeteriaSystem(root)
+    root.mainloop()
