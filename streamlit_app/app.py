@@ -54,6 +54,8 @@ def remove_from_cart(index):
     st.session_state.cart.pop(index)
     st.rerun()
 
+import textwrap
+
 def checkout():
     if not st.session_state.cart:
         st.error("Cart is empty!")
@@ -81,6 +83,14 @@ def checkout():
             db.add(db_item)
         
         db.commit()
+        
+        # Save order for receipt view
+        st.session_state.last_order = {
+            "id": db_order.id,
+            "items": st.session_state.cart.copy(),
+            "total": total_amount
+        }
+        
         st.session_state.cart = []
         st.success(f"Order #{db_order.id} placed successfully! Total: ${total_amount:.2f}")
         st.balloons()
@@ -89,6 +99,54 @@ def checkout():
         st.error(f"Error placing order: {str(e)}")
     finally:
         db.close()
+
+# Helper function to render receipt
+def render_receipt(cart_items, total, order_id=None):
+    items_html = ""
+    for item in cart_items:
+        items_html += f"""
+<div class="receipt-item">
+    <span class="item-name">{item['quantity']}x {item['name']}</span>
+    <span class="item-price">${item['subtotal']:.2f}</span>
+</div>"""
+        
+    title_text = f"ORDER #{order_id}" if order_id else "RECEIPT"
+        
+    html = f"""
+<div class="receipt-container">
+    <div class="receipt-header">
+        <p class="receipt-title">{title_text}</p>
+        <p style="font-size: 12px; color: #666; margin-top: 5px;">Modern Cafeteria</p>
+    </div>
+    <div class="dashed-line"></div>
+    <div style="margin-bottom: 15px;">
+        {items_html}
+    </div>
+    <div class="dashed-line"></div>
+    <div class="receipt-total">
+        <span>TOTAL</span>
+        <span>${total:.2f}</span>
+    </div>
+    <div class="dashed-line"></div>
+    <div class="receipt-footer">
+        <p>THANK YOU!</p>
+        <p>Visit Again</p>
+    </div>
+</div>
+<div style="text-align: center; margin-top: 20px;">
+    <button onclick="window.print()" style="
+        background-color: #4b5563; 
+        color: white; 
+        border: none; 
+        padding: 8px 16px; 
+        border-radius: 4px; 
+        cursor: pointer;
+        font-size: 14px;">
+        🖨️ Print Receipt
+    </button>
+</div>
+"""
+    return html
 
 # Top Horizontal Navigation
 # Calculate cart items for label
@@ -99,8 +157,8 @@ if st.session_state.cart:
 
 selected = option_menu(
     menu_title=None, # Hide title
-    options=["Mains", "Sides", "Beverages", "Desserts", "Cart"],
-    icons=['egg-fried', 'circle', 'cup-straw', 'cake', 'cart'],
+    options=["Mains", "Sides", "Beverages", "Desserts", "Cart", "Orders"],
+    icons=['egg-fried', 'circle', 'cup-straw', 'cake', 'cart', 'clock-history'],
     menu_icon="cast",
     default_index=0,
     orientation="horizontal",
@@ -124,16 +182,57 @@ category_map = {
     "Desserts": "desserts"
 }
 
-if selected == "Cart":
+if selected == "Orders":
+    st.subheader("📜 Order History")
+    
+    # Fetch all orders (newest first)
+    orders = db.query(models.Order).order_by(models.Order.timestamp.desc()).all()
+    
+    if not orders:
+        st.info("No past orders found.")
+    else:
+        for order in orders:
+            with st.container(border=True):
+                c1, c2, c3, c4 = st.columns([1, 2, 1, 1])
+                with c1:
+                    st.write(f"**#{order.id}**")
+                with c2:
+                    st.write(f"{order.timestamp.strftime('%Y-%m-%d %H:%M')}")
+                with c3:
+                    st.write(f"**${order.total_amount:.2f}**")
+                with c4:
+                    if st.button("View Bill", key=f"view_{order.id}"):
+                        # Reconstruct items dict for render_receipt
+                        items_data = [
+                            {
+                                'quantity': item.quantity,
+                                'name': item.item_name,
+                                'subtotal': item.subtotal
+                            }
+                            for item in order.items
+                        ]
+                        st.markdown(render_receipt(items_data, order.total_amount, order.id), unsafe_allow_html=True)
+
+elif selected == "Cart":
     st.subheader("🛍️ Shopping Cart")
     
+    # Check for Last Order
+    if 'last_order' in st.session_state and st.session_state.last_order:
+        with st.expander("📜 View Last Order Receipt", expanded=True):
+            last = st.session_state.last_order
+            st.markdown(render_receipt(last['items'], last['total'], last['id']), unsafe_allow_html=True)
+            if st.button("Start New Order"):
+                del st.session_state.last_order
+                st.rerun()
+
     if not st.session_state.cart:
-        st.info("Your cart is empty. Go add some delicious food!")
-        st.markdown("""
-            <div style="display: flex; justify-content: center;">
-                <img src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png" width="200">
-            </div>
-        """, unsafe_allow_html=True)
+        if 'last_order' not in st.session_state:
+            st.info("Your cart is empty. Go add some delicious food!")
+            st.markdown("""
+                <div style="display: flex; justify-content: center;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png" width="200">
+                </div>
+            """, unsafe_allow_html=True)
     else:
         for idx, item in enumerate(st.session_state.cart):
             with st.container():
@@ -156,69 +255,12 @@ if selected == "Cart":
         if st.button("Confirm Order", type="primary", use_container_width=True):
             checkout()
             
-    # Show Bill Section
-    st.divider()
+    # Show Bill Section (Current Cart)
     if st.session_state.cart:
-        if st.checkbox("🧾 Show Bill", help="Generate a receipt for the current cart"):
+        st.divider()
+        if st.checkbox("🧾 Show Bill Preview", help="Generate a receipt for the current cart"):
             total_bill = sum(item['subtotal'] for item in st.session_state.cart)
-            
-            # Generate Receipt HTML
-            receipt_html = f"""
-            <div class="receipt-container">
-                <div class="receipt-header">
-                    <p class="receipt-title">RECEIPT</p>
-                    <p style="font-size: 12px; color: #666; margin-top: 5px;">Modern Cafeteria</p>
-                </div>
-                
-                <div class="dashed-line"></div>
-                
-                <div style="margin-bottom: 15px;">
-            """
-            
-            for item in st.session_state.cart:
-                receipt_html += f"""
-                <div class="receipt-item">
-                    <span class="item-name">{item['quantity']}x {item['name']}</span>
-                    <span class="item-price">${item['subtotal']:.2f}</span>
-                </div>
-                """
-                
-            receipt_html += f"""
-                </div>
-                
-                <div class="dashed-line"></div>
-                
-                <div class="receipt-total">
-                    <span>TOTAL</span>
-                    <span>${total_bill:.2f}</span>
-                </div>
-                
-                <div class="dashed-line"></div>
-                
-                <div class="receipt-footer">
-                    <p>THANK YOU!</p>
-                    <p>Visit Again</p>
-                </div>
-            </div>
-            """
-            
-            st.markdown(receipt_html, unsafe_allow_html=True)
-            
-            # Print Button (using JavaScript)
-            st.markdown("""
-            <div style="text-align: center; margin-top: 20px;">
-                <button onclick="window.print()" style="
-                    background-color: #4b5563; 
-                    color: white; 
-                    border: none; 
-                    padding: 8px 16px; 
-                    border-radius: 4px; 
-                    cursor: pointer;
-                    font-size: 14px;">
-                    🖨️ Print Receipt
-                </button>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(render_receipt(st.session_state.cart, total_bill), unsafe_allow_html=True)
 
 else:
     # Menu View
