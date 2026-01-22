@@ -192,26 +192,35 @@ if selected == "Orders":
         st.info("No past orders found.")
     else:
         for order in orders:
+            # Styled Card for Order History
             with st.container(border=True):
-                c1, c2, c3, c4 = st.columns([1, 2, 1, 1])
+                # Header Row
+                c1, c2, c3, c4 = st.columns([1.5, 2, 1.5, 1.5])
                 with c1:
-                    st.write(f"**#{order.id}**")
+                    st.markdown(f"<h3 style='margin:0; font-size:18px;'>#{order.id}</h3>", unsafe_allow_html=True)
                 with c2:
-                    st.write(f"{order.timestamp.strftime('%Y-%m-%d %H:%M')}")
+                    st.caption("Date")
+                    st.write(f"{order.timestamp.strftime('%b %d, %H:%M')}")
                 with c3:
-                    st.write(f"**${order.total_amount:.2f}**")
+                    st.caption("Total")
+                    st.markdown(f"<span style='color:#4ade80; font-weight:bold;'>${order.total_amount:.2f}</span>", unsafe_allow_html=True)
                 with c4:
-                    if st.button("View Bill", key=f"view_{order.id}"):
-                        # Reconstruct items dict for render_receipt
-                        items_data = [
-                            {
-                                'quantity': item.quantity,
-                                'name': item.item_name,
-                                'subtotal': item.subtotal
-                            }
-                            for item in order.items
-                        ]
-                        st.markdown(render_receipt(items_data, order.total_amount, order.id), unsafe_allow_html=True)
+                    if st.button("📄 Receipt", key=f"view_{order.id}", use_container_width=True):
+                        st.session_state[f"show_receipt_{order.id}"] = not st.session_state.get(f"show_receipt_{order.id}", False)
+                
+                # Expandable Receipt View
+                if st.session_state.get(f"show_receipt_{order.id}", False):
+                    st.divider()
+                    # Reconstruct items dict for render_receipt
+                    items_data = [
+                        {
+                            'quantity': item.quantity,
+                            'name': item.item_name,
+                            'subtotal': item.subtotal
+                        }
+                        for item in order.items
+                    ]
+                    st.markdown(render_receipt(items_data, order.total_amount, order.id), unsafe_allow_html=True)
 
 elif selected == "Cart":
     st.subheader("🛍️ Shopping Cart")
