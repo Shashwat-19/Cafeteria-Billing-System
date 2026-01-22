@@ -15,7 +15,7 @@ st.set_page_config(
     page_title="Modern Cafeteria",
     page_icon="🍽️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed" # Hide sidebar by default since we use top nav
 )
 
 # Load custom CSS
@@ -90,32 +90,30 @@ def checkout():
     finally:
         db.close()
 
-# Sidebar
-with st.sidebar:
-    st.title("🍽️ Cafeteria")
-    selected = option_menu(
-        "Menu",
-        ["Mains", "Sides", "Beverages", "Desserts", "Cart"],
-        icons=['egg-fried', 'circle', 'cup-straw', 'cake', 'cart'],
-        menu_icon="cast",
-        default_index=0,
-        styles={
-            "container": {"padding": "5!important", "background-color": "#262730"},
-            "icon": {"color": "#3b82f6", "font-size": "20px"}, 
-            "nav-link": {"font-size": "16px", "text-align": "left", "margin":"0px", "--hover-color": "#374151"},
-            "nav-link-selected": {"background-color": "#3b82f6"},
-        }
-    )
-    
-    # Mini Cart Preview
-    if st.session_state.cart:
-        st.divider()
-        st.subheader("🛒 Cart Preview")
-        st.write(f"Items: {len(st.session_state.cart)}")
-        st.write(f"Total: ${sum(item['subtotal'] for item in st.session_state.cart):.2f}")
-        if st.button("Go to Checkout"):
-            # This is a bit hacky in Streamlit, ideally we just switch the view manually
-            st.info("Switch to 'Cart' tab to checkout!")
+# Top Horizontal Navigation
+# Calculate cart items for label
+cart_label = "Cart"
+if st.session_state.cart:
+    cart_count = len(st.session_state.cart)
+    cart_label = f"Cart ({cart_count})"
+
+selected = option_menu(
+    menu_title=None, # Hide title
+    options=["Mains", "Sides", "Beverages", "Desserts", "Cart"],
+    icons=['egg-fried', 'circle', 'cup-straw', 'cake', 'cart'],
+    menu_icon="cast",
+    default_index=0,
+    orientation="horizontal",
+    styles={
+        "container": {"padding": "0!important", "background-color": "#262730"},
+        "icon": {"color": "#3b82f6", "font-size": "18px"}, 
+        "nav-link": {"font-size": "16px", "text-align": "center", "margin":"0px", "--hover-color": "#374151"},
+        "nav-link-selected": {"background-color": "#3b82f6"},
+    }
+)
+
+# Header with Title
+st.markdown("<h1 style='text-align: center; margin-bottom: 2rem;'>🍽️ Modern Cafeteria</h1>", unsafe_allow_html=True)
 
 # Main Content
 db = get_db()
@@ -127,20 +125,24 @@ category_map = {
 }
 
 if selected == "Cart":
-    st.title("🛍️ Shopping Cart")
+    st.subheader("🛍️ Shopping Cart")
     
     if not st.session_state.cart:
         st.info("Your cart is empty. Go add some delicious food!")
-        st.image("https://cdn-icons-png.flaticon.com/512/11329/11329060.png", width=200)
+        st.markdown("""
+            <div style="display: flex; justify-content: center;">
+                <img src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png" width="200">
+            </div>
+        """, unsafe_allow_html=True)
     else:
         for idx, item in enumerate(st.session_state.cart):
             with st.container():
                 col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
                 with col1:
-                    st.subheader(item['name'])
+                    st.write(f"**{item['name']}**")
                     st.caption(f"${item['price']:.2f} each")
                 with col2:
-                    st.write(f"**Qty:** {item['quantity']}")
+                    st.write(f"x {item['quantity']}")
                 with col3:
                     st.write(f"**${item['subtotal']:.2f}**")
                 with col4:
@@ -156,7 +158,6 @@ if selected == "Cart":
 
 else:
     # Menu View
-    st.title(f"{selected}")
     category_key = category_map[selected]
     
     # Fetch items
