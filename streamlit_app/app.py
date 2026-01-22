@@ -155,6 +155,70 @@ if selected == "Cart":
         
         if st.button("Confirm Order", type="primary", use_container_width=True):
             checkout()
+            
+    # Show Bill Section
+    st.divider()
+    if st.session_state.cart:
+        if st.checkbox("🧾 Show Bill", help="Generate a receipt for the current cart"):
+            total_bill = sum(item['subtotal'] for item in st.session_state.cart)
+            
+            # Generate Receipt HTML
+            receipt_html = f"""
+            <div class="receipt-container">
+                <div class="receipt-header">
+                    <p class="receipt-title">RECEIPT</p>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">Modern Cafeteria</p>
+                </div>
+                
+                <div class="dashed-line"></div>
+                
+                <div style="margin-bottom: 15px;">
+            """
+            
+            for item in st.session_state.cart:
+                receipt_html += f"""
+                <div class="receipt-item">
+                    <span class="item-name">{item['quantity']}x {item['name']}</span>
+                    <span class="item-price">${item['subtotal']:.2f}</span>
+                </div>
+                """
+                
+            receipt_html += f"""
+                </div>
+                
+                <div class="dashed-line"></div>
+                
+                <div class="receipt-total">
+                    <span>TOTAL</span>
+                    <span>${total_bill:.2f}</span>
+                </div>
+                
+                <div class="dashed-line"></div>
+                
+                <div class="receipt-footer">
+                    <p>THANK YOU!</p>
+                    <p>Visit Again</p>
+                </div>
+            </div>
+            """
+            
+            st.markdown(receipt_html, unsafe_allow_html=True)
+            
+            # Print Button (using JavaScript)
+            st.markdown("""
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="window.print()" style="
+                    background-color: #4b5563; 
+                    color: white; 
+                    border: none; 
+                    padding: 8px 16px; 
+                    border-radius: 4px; 
+                    cursor: pointer;
+                    font-size: 14px;">
+                    🖨️ Print Receipt
+                </button>
+            </div>
+            """, unsafe_allow_html=True)
 
 else:
     # Menu View
@@ -167,13 +231,13 @@ else:
     cols = st.columns(3)
     for i, item in enumerate(items):
         with cols[i % 3]:
-            with st.container():
-                # Custom HTML card
+            with st.container(border=True): # Use Streamlit's native border container for the card look
+                st.image(item.image_url, use_container_width=True)
                 st.markdown(f"""
-                <div class="menu-item-container">
-                    <h3>{item.name}</h3>
-                    <p style="color: #9ca3af; height: 40px; overflow: hidden;">{item.description}</p>
-                    <p class="price-tag">${item.price:.2f}</p>
+                <div style="padding: 10px;">
+                    <h3 style="margin: 0; font-size: 1.2rem;">{item.name}</h3>
+                    <p style="color: #9ca3af; font-size: 0.9em; margin: 5px 0;">{item.description}</p>
+                    <p style="color: #f59e0b; font-weight: bold; font-size: 1.1rem; margin: 0;">${item.price:.2f}</p>
                 </div>
                 """, unsafe_allow_html=True)
                 
